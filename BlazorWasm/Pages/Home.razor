@@ -1,0 +1,161 @@
+﻿@page "/"
+@using BlazorWasm.Services
+@using Business.Entities
+@using Business.DTOs
+@inject IStudentService stu
+
+<div class="row">
+    <div class="col-lg-6">
+        <EditForm Model="student" OnValidSubmit="Save">
+            <DataAnnotationsValidator/>
+            <InputText @bind-Value="student.Name"
+                        Label="Custom Fullname"
+                        Placeholder="John Doe"
+                        class="form-control mb-3"/>
+            <ValidationMessage For="()=>student.Name"/>
+
+            <InputText @bind-Value="student.Grade"
+                        Label="Custom Grade"
+                        Placeholder="1st Grade"
+                              class="form-control mb-3" />
+            <ValidationMessage For="()=>student.Grade" />
+
+            <button class="btn btn-primary mt-5 mb-5" type="submit">Save</button>
+                        
+        </EditForm>
+    </div>
+    <div class="col-lg-6">
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Id</th>
+                    <th>Name</th>
+                    <th>Grade</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Students is not null)
+                {
+                    foreach (var item in Students)
+                    {
+                        <tr>
+                            <td>@item.Id</td>
+                            <td>@item.Name</td>
+                            <td>@item.Grade</td>
+                            <td>
+                                <button class="btn btn-info btn-sm" @onclick="()=> EditClicked(item)">Edit</button>
+                                <button class="btn btn-danger btn-sm" @onclick="()=> DeleteClicked(item.Id)">Delete</button>
+                            </td>
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+</div>
+</div>
+
+<ConfirmDialog @ref="dialog" />
+<Toasts class="p-3" Messages="messages" AutoHide="true" Delay="4000" Placement="ToastsPlacement.TopRight" />
+
+@code{
+    Student student = new();
+
+    private ConfirmDialog dialog = default!;
+    //string Instruction = "Are you sure you want to do this?";
+    //int duration = 4000;
+    List<ToastMessage> messages = new List<ToastMessage>();
+
+    async Task Save(){
+
+        var response = new ServiceResponse(false, null!);
+        if (student.Id > 0)
+            response = await stu.UpdateAsync(student);
+        else
+            response = await stu.AddAsync(student);
+
+        if (!response.Flag)
+        {
+            // Show error toast message
+            ShowMessage(ToastType.Warning, response.Message);
+            return;
+        }
+
+        // Show success toast message
+        ShowMessage(ToastType.Success, response.Message);
+        await GetData();
+        student = new();
+    }
+
+
+    private void ShowMessage(ToastType toastType, string message)
+    {
+        messages.Add(CreateToastMessage(toastType, message));
+    }
+    private void ShowMessage(ToastType toastType, string title, string message)
+    {
+        messages.Add(CreateToastMessage(toastType, title, message));
+    }
+
+    private ToastMessage CreateToastMessage(ToastType toastType, string message)
+    => new ToastMessage
+        {
+            Type = toastType,
+            Title = toastType == ToastType.Warning ? "Error" : "Success",
+            HelpText = $"{DateTime.Now}",
+            Message = message,
+        };
+
+    private ToastMessage CreateToastMessage(ToastType toastType, string title, string message)
+    => new ToastMessage
+        {
+            Type = toastType,
+            Title = title,
+            HelpText = $"{DateTime.Now}",
+            Message = message,
+        };
+
+    List<Student> Students = new();
+    protected override async Task OnInitializedAsync() => await GetData();
+    private async Task GetData() => Students = await stu.GetAsync();
+    void EditClicked(Student incomStudent) => student = incomStudent;
+
+    private int DeleteId { get; set; } = -1;
+
+    async void DeleteClicked(int id)
+    {
+        DeleteId = id; // Set the ID to be deleted
+        await ShowConfirmationAsync(); // Call the confirmation dialog
+    }
+
+    private async Task ShowConfirmationAsync()
+    {
+        var confirmation = await dialog.ShowAsync(
+            title: "Are you sure you want to delete this?",
+            message1: "This will delete the record. Once deleted cannot be rolled back.",
+            message2: "Do you want to proceed?"
+        );
+
+        if (confirmation)
+        {
+            await HandleDeletionAsync(); // Handle deletion if confirmed
+        }
+        else
+        {
+            // Handle cancellation (if needed)
+        }
+    }
+
+    private async Task HandleDeletionAsync()
+    {
+        if (DeleteId == 0) return; // Check if there's an ID to delete
+
+        var (flag, message) = await stu.DeleteAsync(DeleteId); // Perform the deletion
+        await GetData(); // Refresh the data
+        DeleteId = 0; // Reset the ID
+
+        ShowMessage(ToastType.Warning, "Deleted", message);
+        StateHasChanged();
+        // Optionally, handle any post-deletion logic (like saving changes)
+    }
+}
