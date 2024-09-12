@@ -32,19 +32,25 @@ builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
-builder.Services.AddDbContext<AppDbContext>(o => o.UseNpgsql(builder.Configuration.GetSection("ConnectionStrings")["DefaultConnection"]));
-builder.Services.AddScoped<IStudent, StudentRepo>();
 
-builder.Services.AddDatabaseDeveloperPageExceptionFilter();
+
+
+builder.Services.AddDbContext<AppDbContext>(o => o.UseNpgsql(builder.Configuration.GetSection("ConnectionStrings")["DefaultConnection"]));
 
 builder.Services.AddIdentityCore<ApplicationUser>(options => options.SignIn.RequireConfirmedAccount = true)
     .AddEntityFrameworkStores<AppDbContext>()
     .AddSignInManager()
     .AddDefaultTokenProviders();
 
+builder.Services.AddScoped<IStudent, StudentRepo>();
+//builder.Services.AddScoped<IStudentService, StudentService>();
 builder.Services.AddSingleton<IEmailSender<ApplicationUser>, IdentityNoOpEmailSender>();
+builder.Services.AddBlazorBootstrap();
 
-builder.Services.AddSwaggerGen();
+builder.Services.AddDatabaseDeveloperPageExceptionFilter();
+
+
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
