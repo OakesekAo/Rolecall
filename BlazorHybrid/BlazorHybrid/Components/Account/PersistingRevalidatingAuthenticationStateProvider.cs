@@ -1,5 +1,5 @@
 using BlazorHybrid.Client;
-using BlazorHybrid.Data;
+using DataAccess.Data;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.Server;

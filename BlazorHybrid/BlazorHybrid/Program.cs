@@ -1,7 +1,6 @@
 using BlazorHybrid.Client.Pages;
 using BlazorHybrid.Components;
 using BlazorHybrid.Components.Account;
-using BlazorHybrid.Data;
 using DataAccess.Data;
 using DataAccess.Repositories;
 using Microsoft.AspNetCore.Components.Authorization;
@@ -39,7 +38,7 @@ builder.Services.AddScoped<IStudent, StudentRepo>();
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
 builder.Services.AddIdentityCore<ApplicationUser>(options => options.SignIn.RequireConfirmedAccount = true)
-    .AddEntityFrameworkStores<ApplicationDbContext>()
+    .AddEntityFrameworkStores<AppDbContext>()
     .AddSignInManager()
     .AddDefaultTokenProviders();
 

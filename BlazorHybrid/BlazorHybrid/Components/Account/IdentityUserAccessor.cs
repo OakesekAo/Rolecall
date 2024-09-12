@@ -1,4 +1,4 @@
-using BlazorHybrid.Data;
+using DataAccess.Data;
 using Microsoft.AspNetCore.Identity;
 
 namespace BlazorHybrid.Components.Account
