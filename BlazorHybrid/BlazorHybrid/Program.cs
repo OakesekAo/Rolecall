@@ -1,7 +1,11 @@
 using BlazorHybrid.Client.Pages;
 using BlazorHybrid.Components;
 using BlazorHybrid.Components.Account;
+using Business.Entities;
+using Business.Interfaces;
+using Business.Services;
 using DataAccess.Data;
+using DataAccess.Interfaces;
 using DataAccess.Repositories;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -14,6 +18,8 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents()
     .AddInteractiveWebAssemblyComponents();
+// Register HttpClient for Blazor
+builder.Services.AddHttpClient();
 
 builder.Services.AddCascadingAuthenticationState();
 builder.Services.AddScoped<IdentityUserAccessor>();
@@ -42,8 +48,10 @@ builder.Services.AddIdentityCore<ApplicationUser>(options => options.SignIn.Requ
     .AddSignInManager()
     .AddDefaultTokenProviders();
 
-builder.Services.AddScoped<IStudent, StudentRepo>();
-//builder.Services.AddScoped<IStudentService, StudentService>();
+// Register the business service
+builder.Services.AddScoped<IStudentService, StudentService>();
+// Register your repository
+builder.Services.AddScoped<IStudentRepository, StudentRepository>();
 builder.Services.AddSingleton<IEmailSender<ApplicationUser>, IdentityNoOpEmailSender>();
 builder.Services.AddBlazorBootstrap();
 

@@ -5,9 +5,9 @@ namespace BlazorHybrid.Services
 {
     public interface IStudentService
     {
-        Task<ServiceResponse> AddAsync(Student student);
-        Task<ServiceResponse> UpdateAsync(Student student);
-        Task<ServiceResponse> DeleteAsync(int id);
+        Task<BllServiceResponse> AddAsync(Student student);
+        Task<BllServiceResponse> UpdateAsync(Student student);
+        Task<BllServiceResponse> DeleteAsync(int id);
         Task<List<Student>> GetAsync();
         Task<Student> GetByIdAsync(int id);
     }

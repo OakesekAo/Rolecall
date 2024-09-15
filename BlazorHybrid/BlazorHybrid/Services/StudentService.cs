@@ -1,5 +1,6 @@
 ﻿using Business.DTOs;
 using Business.Entities;
+using System.Net.Http.Json;
 
 namespace BlazorHybrid.Services
 {
@@ -12,17 +13,17 @@ namespace BlazorHybrid.Services
             this.httpClient = httpClient;
         }
 
-        public async Task<ServiceResponse> AddAsync(Student student)
+        public async Task<BllServiceResponse> AddAsync(Student student)
         {
             var data = await httpClient.PostAsJsonAsync("api/student", student);
-            var response = await data.Content.ReadFromJsonAsync<ServiceResponse>();
+            var response = await data.Content.ReadFromJsonAsync<BllServiceResponse>();
             return response!;
         }
 
-        public async Task<ServiceResponse> DeleteAsync(int id)
+        public async Task<BllServiceResponse> DeleteAsync(int id)
         {
             var data = await httpClient.DeleteAsync($"api/student/{id}");
-            var response = await data.Content.ReadFromJsonAsync<ServiceResponse>();
+            var response = await data.Content.ReadFromJsonAsync<BllServiceResponse>();
             return response!;
 
         }
@@ -33,10 +34,10 @@ namespace BlazorHybrid.Services
         public async Task<Student> GetByIdAsync(int id) =>
             await httpClient.GetFromJsonAsync<Student>($"api/student/{id}")!;
 
-        public async Task<ServiceResponse> UpdateAsync(Student student)
+        public async Task<BllServiceResponse> UpdateAsync(Student student)
         {
             var data = await httpClient.PutAsJsonAsync("api/student", student);
-            var response = await data.Content.ReadFromJsonAsync<ServiceResponse>();
+            var response = await data.Content.ReadFromJsonAsync<BllServiceResponse>();
             return response!;
         }
     }

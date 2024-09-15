@@ -1,25 +1,20 @@
-﻿using Business.DTOs;
-using Business.Entities;
-using DataAccess.Data;
+﻿using DataAccess.Data;
+using DataAccess.Entities;
+using DataAccess.Interfaces;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace DataAccess.Repositories
 {
-    public class StudentRepo : IStudent
+    public class StudentRepository : IStudentRepository
     {
         private readonly AppDbContext appDbContext;
 
-        public StudentRepo(AppDbContext appDbContext)
+        public StudentRepository(AppDbContext appDbContext)
         {
             this.appDbContext = appDbContext;
         }
 
-        public async Task<ServiceResponse> AddAsync(Student student)
+        public async Task<ServiceResponse> AddAsync(StudentEntity student)
         {
             var check = await appDbContext.Students
                 .FirstOrDefaultAsync(c => c.Name.ToLower() == student.Name.ToLower());
@@ -41,17 +36,17 @@ namespace DataAccess.Repositories
             return new ServiceResponse(true, "Deleted");
         }
 
-        public async Task<List<Student>> GetAsync()
+        public async Task<List<StudentEntity>> GetAsync()
         {
             return await appDbContext.Students.AsNoTracking().ToListAsync();
         }
 
-        public async Task<Student> GetByIdAsync(int id)
+        public async Task<StudentEntity> GetByIdAsync(int id)
         {
             return await appDbContext.Students.FindAsync(id);
         }
 
-        public async Task<ServiceResponse> UpdateAsync(Student student)
+        public async Task<ServiceResponse> UpdateAsync(StudentEntity student)
         {
             appDbContext.Update(student);
             await appDbContext.SaveChangesAsync();

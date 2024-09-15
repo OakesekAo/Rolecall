@@ -1,5 +1,5 @@
-﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
-using Business.Entities;
+﻿using DataAccess.Entities;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
 namespace DataAccess.Data
@@ -11,6 +11,6 @@ namespace DataAccess.Data
 
         }
 
-        public virtual DbSet<Student> Students { get; set; }
+        public virtual DbSet<StudentEntity> Students { get; set; }
     }
 }

@@ -1,8 +1,9 @@
 ﻿@page "/"
-@using BlazorHybrid.Services
+@rendermode InteractiveServer
 @using Business.Entities
 @using Business.DTOs
-@inject IStudent stu
+@using Business.Interfaces
+@inject IStudentService stu
 
 <div class="row">
     <div class="col-lg-6">
@@ -59,7 +60,7 @@
 <Toasts class="p-3" Messages="messages" AutoHide="true" Delay="4000" Placement="ToastsPlacement.TopRight" />
 
 @code{
-    Student student = new();
+    StudentDTO student = new();
 
     private ConfirmDialog dialog = default!;
     //string Instruction = "Are you sure you want to do this?";
@@ -68,11 +69,11 @@
 
     async Task Save(){
 
-        var response = new ServiceResponse(false, null!);
+        var response = new BllServiceResponse(false, null!);
         if (student.Id > 0)
-            response = await stu.UpdateAsync(student);
+            response = await stu.UpdateStudentAsync(student);
         else
-            response = await stu.AddAsync(student);
+            response = await stu.AddStudentAsync(student);
 
         if (!response.Flag)
         {
@@ -115,10 +116,10 @@
             Message = message,
         };
 
-    List<Student> Students = new();
+    List<StudentDTO> Students = new();
     protected override async Task OnInitializedAsync() => await GetData();
-    private async Task GetData() => Students = await stu.GetAsync();
-    void EditClicked(Student incomStudent) => student = incomStudent;
+    private async Task GetData() => Students = await stu.GetAllStudentsAsync();
+    void EditClicked(StudentDTO incomStudent) => student = incomStudent;
 
     private int DeleteId { get; set; } = -1;
 
@@ -150,7 +151,7 @@
     {
         if (DeleteId == 0) return; // Check if there's an ID to delete
 
-        var (flag, message) = await stu.DeleteAsync(DeleteId); // Perform the deletion
+        var (flag, message) = await stu.DeleteStudentAsync(DeleteId); // Perform the deletion
         await GetData(); // Refresh the data
         DeleteId = 0; // Reset the ID
 

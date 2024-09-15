@@ -2,6 +2,6 @@
 
 namespace Business.DTOs
 {
-public record ServiceResponse(bool Flag, string Message);
+public record BllServiceResponse(bool Flag, string Message);
 
 }
