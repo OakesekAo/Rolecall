@@ -3,29 +3,30 @@
 @using Business.Entities
 @using Business.DTOs
 @using Business.Interfaces
-@inject IStudentService stu
+@inject IStudentService stu // Injecting the student service from the BLL
 
 <div class="row">
     <div class="col-lg-6">
+        <!-- Form for adding or updating a student -->
         <EditForm Model="student" OnValidSubmit="Save">
-            <DataAnnotationsValidator/>
+            <DataAnnotationsValidator />
             <InputText @bind-Value="student.Name"
-                        Label="Custom Fullname"
-                        Placeholder="John Doe"
-                        class="form-control mb-3"/>
-            <ValidationMessage For="()=>student.Name"/>
+                       Label="Custom Fullname"
+                       Placeholder="John Doe"
+                       class="form-control mb-3" />
+            <ValidationMessage For="() => student.Name" />
 
             <InputText @bind-Value="student.Grade"
-                        Label="Custom Grade"
-                        Placeholder="1st Grade"
-                              class="form-control mb-3" />
-            <ValidationMessage For="()=>student.Grade" />
+                       Label="Custom Grade"
+                       Placeholder="1st Grade"
+                       class="form-control mb-3" />
+            <ValidationMessage For="() => student.Grade" />
 
             <button class="btn btn-primary mt-5 mb-5" type="submit">Save</button>
-                        
         </EditForm>
     </div>
     <div class="col-lg-6">
+        <!-- Table to display the list of students -->
         <table class="table table-striped">
             <thead>
                 <tr>
@@ -36,99 +37,110 @@
                 </tr>
             </thead>
             <tbody>
-                @if (Students is not null)
+                @if (Students != null) // Check if the list of students is not null
                 {
-                    foreach (var item in Students)
+                    foreach (var item in Students) // Loop through each student
                     {
                         <tr>
                             <td>@item.Id</td>
                             <td>@item.Name</td>
                             <td>@item.Grade</td>
                             <td>
-                                <button class="btn btn-info btn-sm" @onclick="()=> EditClicked(item)">Edit</button>
-                                <button class="btn btn-danger btn-sm" @onclick="()=> DeleteClicked(item.Id)">Delete</button>
+                                <button class="btn btn-info btn-sm" @onclick="() => EditClicked(item)">Edit</button>
+                                <button class="btn btn-danger btn-sm" @onclick="() => DeleteClicked(item.Id)">Delete</button>
                             </td>
                         </tr>
                     }
                 }
             </tbody>
         </table>
-</div>
+    </div>
 </div>
 
+<!-- Toast notifications for user feedback -->
 <ConfirmDialog @ref="dialog" />
 <Toasts class="p-3" Messages="messages" AutoHide="true" Delay="4000" Placement="ToastsPlacement.TopRight" />
 
-@code{
-    StudentDTO student = new();
+@code {
+    StudentDTO student = new(); // Model for the student form
 
-    private ConfirmDialog dialog = default!;
-    //string Instruction = "Are you sure you want to do this?";
-    //int duration = 4000;
-    List<ToastMessage> messages = new List<ToastMessage>();
+    private ConfirmDialog dialog = default!; // Reference to the confirmation dialog
+    List<ToastMessage> messages = new List<ToastMessage>(); // List to hold toast messages
 
-    async Task Save(){
-
-        var response = new BllServiceResponse(false, null!);
-        if (student.Id > 0)
+    // Method to save a student (add or update)
+    async Task Save()
+    {
+        var response = new BllServiceResponse(false, null!); // Initialize response
+        if (student.Id > 0) // Check if updating an existing student
             response = await stu.UpdateStudentAsync(student);
-        else
+        else // Adding a new student
             response = await stu.AddStudentAsync(student);
 
-        if (!response.Flag)
+        if (!response.Flag) // Show error message if the operation failed
         {
-            // Show error toast message
             ShowMessage(ToastType.Warning, response.Message);
             return;
         }
 
-        // Show success toast message
+        // Show success message
         ShowMessage(ToastType.Success, response.Message);
-        await GetData();
-        student = new();
+        await GetData(); // Refresh the student list
+        student = new(); // Reset the student model for the next entry
     }
 
-
+    // Method to show a toast message
     private void ShowMessage(ToastType toastType, string message)
     {
         messages.Add(CreateToastMessage(toastType, message));
     }
+
+    // Overloaded method to show a toast message with a title
     private void ShowMessage(ToastType toastType, string title, string message)
     {
         messages.Add(CreateToastMessage(toastType, title, message));
     }
 
+    // Create a toast message
     private ToastMessage CreateToastMessage(ToastType toastType, string message)
-    => new ToastMessage
-        {
-            Type = toastType,
-            Title = toastType == ToastType.Warning ? "Error" : "Success",
-            HelpText = $"{DateTime.Now}",
-            Message = message,
-        };
+        => new ToastMessage
+            {
+                Type = toastType,
+                Title = toastType == ToastType.Warning ? "Error" : "Success", // Set title based on toast type
+                HelpText = $"{DateTime.Now}", // Timestamp
+                Message = message,
+            };
 
+    // Overloaded method to create a toast message with a title
     private ToastMessage CreateToastMessage(ToastType toastType, string title, string message)
-    => new ToastMessage
-        {
-            Type = toastType,
-            Title = title,
-            HelpText = $"{DateTime.Now}",
-            Message = message,
-        };
+        => new ToastMessage
+            {
+                Type = toastType,
+                Title = title,
+                HelpText = $"{DateTime.Now}",
+                Message = message,
+            };
 
-    List<StudentDTO> Students = new();
+    List<StudentDTO> Students = new(); // List to hold students
+
+    // Fetch data on initialization
     protected override async Task OnInitializedAsync() => await GetData();
+
+    // Method to retrieve the list of students
     private async Task GetData() => Students = await stu.GetAllStudentsAsync();
+
+    // Method to handle editing a student
     void EditClicked(StudentDTO incomStudent) => student = incomStudent;
 
-    private int DeleteId { get; set; } = -1;
+    private int DeleteId { get; set; } = -1; // ID for the student to be deleted
 
+    // Method to initiate the deletion process
     async void DeleteClicked(int id)
     {
         DeleteId = id; // Set the ID to be deleted
-        await ShowConfirmationAsync(); // Call the confirmation dialog
+        await ShowConfirmationAsync(); // Show confirmation dialog
     }
 
+    // Show confirmation dialog for deletion
     private async Task ShowConfirmationAsync()
     {
         var confirmation = await dialog.ShowAsync(
@@ -141,22 +153,18 @@
         {
             await HandleDeletionAsync(); // Handle deletion if confirmed
         }
-        else
-        {
-            // Handle cancellation (if needed)
-        }
     }
 
+    // Method to handle the actual deletion of a student
     private async Task HandleDeletionAsync()
     {
         if (DeleteId == 0) return; // Check if there's an ID to delete
 
         var (flag, message) = await stu.DeleteStudentAsync(DeleteId); // Perform the deletion
-        await GetData(); // Refresh the data
+        await GetData(); // Refresh the student list
         DeleteId = 0; // Reset the ID
 
-        ShowMessage(ToastType.Warning, "Deleted", message);
-        StateHasChanged();
-        // Optionally, handle any post-deletion logic (like saving changes)
+        ShowMessage(ToastType.Warning, "Deleted", message); // Show deletion message
+        StateHasChanged(); // Refresh the component
     }
 }

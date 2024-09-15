@@ -18,6 +18,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents()
     .AddInteractiveWebAssemblyComponents();
+builder.Services.AddBlazorBootstrap();
 // Register HttpClient for Blazor
 builder.Services.AddHttpClient();
 
@@ -53,7 +54,7 @@ builder.Services.AddScoped<IStudentService, StudentService>();
 // Register your repository
 builder.Services.AddScoped<IStudentRepository, StudentRepository>();
 builder.Services.AddSingleton<IEmailSender<ApplicationUser>, IdentityNoOpEmailSender>();
-builder.Services.AddBlazorBootstrap();
+
 
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
